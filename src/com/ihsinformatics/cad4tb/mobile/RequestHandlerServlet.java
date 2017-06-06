@@ -19,7 +19,7 @@ import org.openmrs.PersonName;
 import org.openmrs.api.context.Context;
 
 import com.ihsinformatics.cad4tb.dao.FormDAO;
-import com.ihsinformatics.cad4tb.mobile.mobile_service.FormService;
+import com.ihsinformatics.cad4tb.mobile.service.FormService;
 import com.ihsinformatics.cad4tb.model.Form;
 import com.ihsinformatics.cad4tb.utils.Logger;
 

@@ -42,8 +42,10 @@ public class Startup extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	}
 	// /usr/share/tomcat6/.OpenMRS/openmrs-runtime.properties
+	//Windows
 	public static final File propsFile = new File("C:\\Users\\Admin\\AppData\\Roaming\\OpenMRS\\openmrs-runtime.properties");
 	// public static final File propsFile = new File(OpenmrsUtil.getApplicationDataDirectory(), "openmrs-runtime.properties");
+	//Linux
 	// public static final File propsFile = new File("/usr/share/tomcat6/.OpenMRS/openmrs-runtime.properties");
 			
 	private void startup() {

@@ -1,4 +1,4 @@
-package com.ihsinformatics.cad4tb.mobile.mobile_service;
+package com.ihsinformatics.cad4tb.mobile.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,15 +11,18 @@ import javax.crypto.SecretKey;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.openmrs.Encounter;
+import org.openmrs.EncounterRole;
 import org.openmrs.Location;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
+import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
+import org.openmrs.User;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
@@ -29,87 +32,89 @@ import org.openmrs.api.context.Context;
 import com.ihsinformatics.cad4tb.mobile.AES256Endec;
 import com.ihsinformatics.cad4tb.mobile.JSONUtils;
 import com.ihsinformatics.cad4tb.mobile.ParamNames;
+import com.ihsinformatics.cad4tb.mobile.SMSHelper;
 import com.ihsinformatics.cad4tb.mobile.Utils;
 
-public class FormSaveService
+public class FormService
 {
-  private static FormSaveService instance;
+  private static FormService instance;
   
   SimpleDateFormat formatterDateTime = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
   SimpleDateFormat formatterTime = new SimpleDateFormat("HH:mm:ss a");
   
-  public static FormSaveService getInstance()
+  public static FormService getInstance()
   {
     if (instance == null) {
-      instance = new FormSaveService();
+      instance = new FormService();
     }
     return instance;
   }
   
-  public Patient createPatient(String username,JSONObject data, String requestType) throws ParseException,Exception
+  public Patient createPatient(String username, JSONArray data, String requestType) throws ParseException
   {
     JSONUtils jsonUtils = JSONUtils.getInstance();
-    String dateEntered = jsonUtils.getValue(data, "cur_date");
-    String sid = jsonUtils.getValue(data, "sid");
-    String mrNumber = jsonUtils.getValue(data, "mr_no");
+    String dateEntered = jsonUtils.getParamValue(data, "cur_date");
+    String sid = jsonUtils.getParamValue(data, "sid");
+    String mrNumber = jsonUtils.getParamValue(data, "mr_no");
     Date dateFromMobileForm = null;
-    String participantFirstName = jsonUtils.getValue(data, "pfname");
-    String participantGivenName = jsonUtils.getValue(data, "pgname");
-    String contaactName = jsonUtils.getValue(data, "contact_name");
-    String participant_number = jsonUtils.getValue(data, "participant_number");
-    String contactNumber = jsonUtils.getValue(data, "contact_number");
-    String str_time = jsonUtils.getValue(data, "str_time");
-    String gender = jsonUtils.getValue(data, "prtcpt_gen");
-    String age = jsonUtils.getValue(data, "prtcpt_dob");
+    String participantFirstName = jsonUtils.getParamValue(data, "pfname");
+    String participantGivenName = jsonUtils.getParamValue(data, "pgname");
+    String contaactName = jsonUtils.getParamValue(data, "contact_name");
+    String participant_number = jsonUtils.getParamValue(data, "participant_number");
+    String contactNumber = jsonUtils.getParamValue(data, "contact_number");
+    String str_time = jsonUtils.getParamValue(data, "str_time");
+    String gender = jsonUtils.getParamValue(data, "prtcpt_gen");
+    String age = jsonUtils.getParamValue(data, "prtcpt_dob");
     
-    String tb_treated = jsonUtils.getValue(data, "tb_treated");
-    String tbtreated_past = jsonUtils.getValue(data, "tbtreated_past");
-    String years_treated = jsonUtils.getValue(data, "years_treated");
-    String cough = jsonUtils.getValue(data, "cough");
-    String cough_past = jsonUtils.getValue(data, "cough_past");
-    String days_cough = jsonUtils.getValue(data, "days_cough");
-    String specific_tbDrug = jsonUtils.getValue(data, "specific_tbDrug");
-    String weight_loss = jsonUtils.getValue(data, "weight_loss");
-    String short_breath = jsonUtils.getValue(data, "short_breath");
-    String dailyActivities = jsonUtils.getValue(data, "DAILY_ACTIVITIES");
-    String night_sweats = jsonUtils.getValue(data, "night_sweats");
-    String hemoptysis = jsonUtils.getValue(data, "hemoptysis");
-    String sputum = jsonUtils.getValue(data, "sputum");
-    String fever = jsonUtils.getValue(data, "fever");
-    String chest_pain = jsonUtils.getValue(data, "chest_pain");
-    String tb_diagnose_sleep = jsonUtils.getValue(data, "tb_diagnose_sleep");
-    String tb_diagnose_fmember = jsonUtils.getValue(data, "tb_diagnose_fmember");
-    String consent_given = jsonUtils.getValue(data, "consent_given");
-    String diabetes = jsonUtils.getValue(data, "diabetes");
-    String hiv_aid = jsonUtils.getValue(data, "hiv_aid");
-    String asthama = jsonUtils.getValue(data, "asthama");
-    String bronchitis = jsonUtils.getValue(data, "bronchitis");
-    String oth_condition = jsonUtils.getValue(data, "oth_condition");
-    String smoke_tobacco = jsonUtils.getValue(data, "smoke_tobacco");
-    String smoking_age = jsonUtils.getValue(data, "smoking_age");
-    String cigarettes = jsonUtils.getValue(data, "cigarettes");
-    String beedi = jsonUtils.getValue(data, "beedi");
-    String pipe = jsonUtils.getValue(data, "pipe");
-    String cigar = jsonUtils.getValue(data, "cigar");
-    String hookah = jsonUtils.getValue(data, "hookah");
-    String oth_form_tobacco = jsonUtils.getValue(data, "oth_form_tobacco");
-    String oth_tobacco = jsonUtils.getValue(data, "oth_tobacco");
-    String mtime_day = jsonUtils.getValue(data, "mtime_day");
-    String current_occup = jsonUtils.getValue(data, "current_occup");
-    String years_occup = jsonUtils.getValue(data, "years_occup");
-    String oth_occup = jsonUtils.getValue(data, "oth_occup");
-    String pr_occup1 = jsonUtils.getValue(data, "pr_occup1");
-    String years_pr_occup1 = jsonUtils.getValue(data, "years_pr_occup1");
-    String pr_occup2 = jsonUtils.getValue(data, "pr_occup2");
-    String years_pr_occup2 = jsonUtils.getValue(data, "years_pr_occup2");
-    String proccup3 = jsonUtils.getValue(data, "proccup3");
-    String years_pr_occup3 = jsonUtils.getValue(data, "years_pr_occup3");
-    String cook_fuel = jsonUtils.getValue(data, "cook_fuel");
-    String oth_fuel = jsonUtils.getValue(data, "oth_fuel");
-    String prtcpt_height = jsonUtils.getValue(data, "prtcpt_height");
-    String prtcpt_weight = jsonUtils.getValue(data, "prtcpt_weight");
-    String fstick_glucose = jsonUtils.getValue(data, "fstick_glucose");
+    String tb_treated = jsonUtils.getParamValue(data, "tb_treated");
+    String tbtreated_past = jsonUtils.getParamValue(data, "tbtreated_past");
+    String years_treated = jsonUtils.getParamValue(data, "years_treated");
+    String cough = jsonUtils.getParamValue(data, "cough");
+    String cough_past = jsonUtils.getParamValue(data, "cough_past");
+    String days_cough = jsonUtils.getParamValue(data, "days_cough");
+    String specific_tbDrug = jsonUtils.getParamValue(data, "specific_tbDrug");
+    String weight_loss = jsonUtils.getParamValue(data, "weight_loss");
+    String short_breath = jsonUtils.getParamValue(data, "short_breath");
+    String dailyActivities = jsonUtils.getParamValue(data, "DAILY_ACTIVITIES");
+    String night_sweats = jsonUtils.getParamValue(data, "night_sweats");
+    String hemoptysis = jsonUtils.getParamValue(data, "hemoptysis");
+    String sputum = jsonUtils.getParamValue(data, "sputum");
+    String fever = jsonUtils.getParamValue(data, "fever");
+    String chest_pain = jsonUtils.getParamValue(data, "chest_pain");
+    String tb_diagnose_sleep = jsonUtils.getParamValue(data, "tb_diagnose_sleep");
+    String tb_diagnose_fmember = jsonUtils.getParamValue(data, "tb_diagnose_fmember");
+    String consent_given = jsonUtils.getParamValue(data, "consent_given");
+    String diabetes = jsonUtils.getParamValue(data, "diabetes");
+    String hiv_aid = jsonUtils.getParamValue(data, "hiv_aid");
+    String asthama = jsonUtils.getParamValue(data, "asthama");
+    String bronchitis = jsonUtils.getParamValue(data, "bronchitis");
+    String oth_condition = jsonUtils.getParamValue(data, "oth_condition");
+    String smoke_tobacco = jsonUtils.getParamValue(data, "smoke_tobacco");
+    String smoking_age = jsonUtils.getParamValue(data, "smoking_age");
+    String cigarettes = jsonUtils.getParamValue(data, "cigarettes");
+    String beedi = jsonUtils.getParamValue(data, "beedi");
+    String pipe = jsonUtils.getParamValue(data, "pipe");
+    String cigar = jsonUtils.getParamValue(data, "cigar");
+    String hookah = jsonUtils.getParamValue(data, "hookah");
+    String oth_form_tobacco = jsonUtils.getParamValue(data, "oth_form_tobacco");
+    String oth_tobacco = jsonUtils.getParamValue(data, "oth_tobacco");
+    String mtime_day = jsonUtils.getParamValue(data, "mtime_day");
+    String current_occup = jsonUtils.getParamValue(data, "current_occup");
+    String years_occup = jsonUtils.getParamValue(data, "years_occup");
+    String oth_occup = jsonUtils.getParamValue(data, "oth_occup");
+    String pr_occup1 = jsonUtils.getParamValue(data, "pr_occup1");
+    String years_pr_occup1 = jsonUtils.getParamValue(data, "years_pr_occup1");
+    String pr_occup2 = jsonUtils.getParamValue(data, "pr_occup2");
+    String years_pr_occup2 = jsonUtils.getParamValue(data, "years_pr_occup2");
+    String proccup3 = jsonUtils.getParamValue(data, "proccup3");
+    String years_pr_occup3 = jsonUtils.getParamValue(data, "years_pr_occup3");
+    String cook_fuel = jsonUtils.getParamValue(data, "cook_fuel");
+    String oth_fuel = jsonUtils.getParamValue(data, "oth_fuel");
+    String prtcpt_height = jsonUtils.getParamValue(data, "prtcpt_height");
+    String prtcpt_weight = jsonUtils.getParamValue(data, "prtcpt_weight");
+    String fstick_glucose = jsonUtils.getParamValue(data, "fstick_glucose");
     
+   
     try
     {
       dateFromMobileForm = formatterDateTime.parse(dateEntered);
@@ -123,7 +128,6 @@ public class FormSaveService
     {
       e.printStackTrace();
     }
-    
     Patient patient = new Patient();
     Location location = findOrCreateLocation("Indus Hospital");
     
@@ -529,20 +533,21 @@ public class FormSaveService
 	    medicalQuestionnaireEncounter.addObs(obstb_treated);
     }
     Context.getEncounterService().saveEncounter(medicalQuestionnaireEncounter);
+    
     return pat;
   }
   
-  public Encounter createScreeningEncounter(String username, JSONObject data) throws ParseException
+  public Encounter createScreeningEncounter(String username, JSONArray data) throws ParseException
   {
     JSONUtils jsonUtils = JSONUtils.getInstance();
     //String dateEntred = jsonUtils.getParamValue(data, "DATE_ENTERED");
     Date date = null;
-    String sid = jsonUtils.getValue(data, "PATIENT_MH_ID");
-    String method1 = jsonUtils.getValue(data, "method1");
-    String t_collected1 = jsonUtils.getValue(data, "t_collected1");
-    String d_collected1 = jsonUtils.getValue(data, "d_collected1");
-    String induct_success = jsonUtils.getValue(data, "induct_success");
-    String adverse_event = jsonUtils.getValue(data, "adverse_event");
+    String sid = jsonUtils.getParamValue(data, "PATIENT_MH_ID");
+    String method1 = jsonUtils.getParamValue(data, "method1");
+    String t_collected1 = jsonUtils.getParamValue(data, "t_collected1");
+    String d_collected1 = jsonUtils.getParamValue(data, "d_collected1");
+    String induct_success = jsonUtils.getParamValue(data, "induct_success");
+    String adverse_event = jsonUtils.getParamValue(data, "adverse_event");
     
     Location location = findOrCreateLocation("Default location");
     Patient pat = findPatient(sid);
@@ -634,6 +639,24 @@ public class FormSaveService
       locationService.saveLocation(oLocation);
     }
     return oLocation;
+  }
+  
+  public void validateUser(JSONObject jsonReponse, JSONArray data)
+  {
+    try
+    {    	
+      String username = JSONUtils.getInstance().getParamValue(data, "USERNAME");
+      String password = JSONUtils.getInstance().getParamValue(data, "PASSWORD");
+      //!!!
+      SecretKey secKey = AES256Endec.getInstance().generateKey();
+      String decPassword = AES256Endec.getInstance().decrypt(password, secKey);
+      Context.authenticate(username, decPassword);
+      jsonReponse.put("result", "success: Logedin");
+    }
+    catch (Exception e)
+    {
+      jsonReponse.put("result", "failure: Invalid Username or Password");
+    }
   }
 
   public void getPatientData(String username, JSONArray data) {
