@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+  <display-name>cad4tbweb</display-name>
+  <welcome-file-list>
+    <welcome-file>jsp/forms.jsp</welcome-file>
+  </welcome-file-list>
+  
+  <servlet>
+	  <servlet-name>cad4tb</servlet-name> 
+	  <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class> 
+	  <load-on-startup>1</load-on-startup> 
+  </servlet>
+ <servlet-mapping>
+	  <servlet-name>cad4tb</servlet-name> 
+	  <url-pattern>*.html</url-pattern> 
+  </servlet-mapping>
+  
+ <!-- <listener>
+  	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class> 
+  </listener> -->
+ <!-- <context-param>
+	 <param-name>contextConfigLocation</param-name> 
+	 <param-value>/WEB-INF/cad4tb-servlet.xml</param-value> 
+ </context-param>
+   -->
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>
+        	classpath:applicationContext-service.xml
+        	classpath:openmrs-servlet.xml
+        	/WEB-INF/cad4tb-servlet.xml
+        </param-value>
+  </context-param>
+  <servlet>
+    <servlet-name>openmrs</servlet-name>
+    <servlet-class>org.openmrs.web.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>
+
+	        </param-value>
+    </init-param>
+  </servlet>
+  <servlet>
+    <description></description>
+    <display-name>RequestHandlerServlet</display-name>
+    <servlet-name>RequestHandlerServlet</servlet-name>
+    <servlet-class>com.ihsinformatics.cad4tb.mobile.RequestHandlerServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>RequestHandlerServlet</servlet-name>
+    <url-pattern>/RequestHandlerServlet</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>Startup</display-name>
+    <servlet-name>Startup</servlet-name>
+    <servlet-class>com.ihsinformatics.cad4tb.mobile.Startup</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Startup</servlet-name>
+    <url-pattern>/Startup</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>Test</display-name>
+    <servlet-name>Test</servlet-name>
+    <servlet-class>com.ihsinformatics.cad4tb.sms.Test</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Test</servlet-name>
+    <url-pattern>/Test</url-pattern>
+  </servlet-mapping>
+</web-app>
